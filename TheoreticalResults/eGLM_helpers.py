@@ -76,92 +76,26 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, dt, tau, g, s, standardiz
     ext_task_betas = np.zeros((nregions))
     ext_mods = []
        
-    for region in range(0, nregions):
-        cur_y = all_nodes_ts[region,:]
-        incoming_connections = weight_matrix[region, :]
-        incoming_connections = np.delete(incoming_connections,region)
-        drop_region = [region]
+#     for region in range(0, nregions):
         
-        #DV
-        next_y = cur_y[1:] #shift column up to predict activity in next time point
-
-        #IV 1
-        cur_y = cur_y[:-1] #drop last time point
-        cur_y = ((2*(tau**2)+dt*(dt-2*tau))/(2*(tau**2)))*cur_y
-        
-        #IV 2
-        other_ns_cur_spont = np.delete(all_nodes_ts, drop_region, axis=0)[:,:-1] #dropping last col/timepoint
-        other_ns_cur_spont = other_ns_cur_spont.T
-        other_ns_cur_spont = np.apply_along_axis(phi, 0, other_ns_cur_spont)
-        other_ns_cur_spont = np.sum(other_ns_cur_spont*incoming_connections, axis = 1) 
-        other_ns_cur_spont = (dt/(2*tau))*((tau-dt)/tau)*g*other_ns_cur_spont
-        
-        #IV 3
-        cur_y_phi = all_nodes_ts[region,:]
-        cur_y_phi = cur_y_phi[:-1]
-        cur_y_phi = (dt/(2*tau))*((tau-dt)/tau)*s*phi(cur_y_phi)
-        
-        #IV 4
-        cur_n_task = (dt/(2*tau))*((tau-dt)/tau)*task_reg[:-1]
-        
-        #IV 5
-        other_ns_next_spont = np.delete(all_nodes_ts, drop_region, axis=0)[:,1:] #dropping first col/timepoint
-        other_ns_next_spont = other_ns_next_spont.T
-        other_ns_next_spont = np.apply_along_axis(phi, 0, other_ns_next_spont)
-        other_ns_next_spont = np.sum(other_ns_next_spont*incoming_connections, axis = 1)
-        other_ns_next_spont = (dt/(2*tau))*g*other_ns_next_spont
-        
-        #IV 6
-        cur_n_first_appr = all_nodes_ts[region,:]
-        cur_n_first_appr = cur_n_first_appr[:-1]
-        cur_n_first_appr = ((tau-dt)/tau)*cur_n_first_appr
-        tmp = np.delete(all_nodes_ts, drop_region, axis=0)[:,:-1] #dropping last col/timepoint
-        tmp = tmp.T
-        tmp = np.apply_along_axis(phi, 0, tmp)
-        tmp = np.sum(tmp*incoming_connections, axis = 1) 
-        tmp = (dt/tau)*g*tmp
-        cur_n_first_appr = cur_n_first_appr+tmp
-        tmp = all_nodes_ts[region,:]
-        tmp = tmp[:-1]
-        tmp = s*phi(tmp)
-        cur_n_first_appr = cur_n_first_appr+tmp
-        cur_n_first_appr = cur_n_first_appr+task_reg[:-1]
-        cur_n_first_appr = (dt/(2*tau))*s*phi(cur_n_first_appr)
-        
-        #IV 7
-        cur_n_next_task = (dt/(2*tau))*task_reg[1:]
         
         #All IVs in design matrix
-        df = pd.DataFrame(data = {"next_y": next_y,
-                                  "cur_y" : cur_y,
-                                  "other_ns_cur_spont": other_ns_cur_spont,
-                                  "cur_y_phi": cur_y_phi,
-                                  "cur_n_task": cur_n_task,
-                                  "other_ns_next_spont": other_ns_next_spont,
-                                  "cur_n_first_appr": cur_n_first_appr,
-                                  "cur_n_next_task": cur_n_next_task})
+#         df = pd.DataFrame(data = )
         
-        s_df = pd.DataFrame(scale(df))
-        s_df.rename(columns={i:j for i,j in zip(s_df.columns,df.columns)}, inplace=True)
+#         s_df = pd.DataFrame(scale(df))
+#         s_df.rename(columns={i:j for i,j in zip(s_df.columns,df.columns)}, inplace=True)
         
-        if standardize:
-            ext_mod = smf.ols(formula = 'next_y ~ -1 + cur_y + other_ns_cur_spont + cur_y_phi + cur_n_task + other_ns_next_spont + cur_n_first_appr + cur_n_next_task', data = s_df)
-        else:
-             ext_mod = smf.ols(formula = 'next_y ~ -1 + cur_y + other_ns_cur_spont + cur_y_phi + cur_n_task + other_ns_next_spont + cur_n_first_appr + cur_n_next_task', data = df)
+#         if standardize:
+#             ext_mod = smf.ols(formula = '........ ~  ........', data = s_df)
+#         else:
+#              ext_mod = smf.ols(formula = '........ ~ ........', data = df)
         
-        ext_res = ext_mod.fit()
-        ext_params = ext_res.params
+#         ext_res = ext_mod.fit()
+#         ext_params = ext_res.params
 
-        # What was the *(dt/(2*tau)) for?
-        # This is the operation applied to the task regressor in the design matrix
-        # 
-        ext_task_betas[region] = (dt/(2*tau))*ext_params["cur_n_next_task"]
-        ext_mods.append(ext_mod)
+#         ext_task_betas[region] = ext_params["......"]
+#         ext_mods.append(ext_mod)
         
-    else:
-        return ({"ext_task_betas": ext_task_betas,
-                 "ext_mods": ext_mods})
-
 def make_stimtimes(Tmax, dt, stim_nodes, stim_mag, tasktiming=None, ncommunities = 3, nodespercommunity = 35,  sa = 500, ea = 1000, iv = 2000):
     
     """
