@@ -106,7 +106,7 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, standardize=False):
         ext_res = ext_mod.fit()
         ext_params = ext_res.params
 
-        ext_task_betas[region] = ext_params["i_t"]
+        ext_task_betas[node] = ext_params["i_t"]
         ext_mods.append(ext_mod)
         
     return ({"ext_task_betas": ext_task_betas,
@@ -317,7 +317,7 @@ def sim_network_task_glm(ncommunities = 3,
     
     ucr_model = run_ucr_glm(all_nodes_ts = y, task_reg = task_reg, standardize=standardize)
     ext_model = run_ext_glm(all_nodes_ts = y, task_reg = task_reg, 
-                            weight_matrix = W, dt = dt, tau = tau, g = g, s = s,
+                            weight_matrix = W, g = g, s = s,
                             standardize=standardize)
     
     ucr_betas = ucr_model["ucr_task_betas"]
@@ -327,24 +327,18 @@ def sim_network_task_glm(ncommunities = 3,
     ext_glms = ext_model["ext_mods"]
     
     return({"W":W, "ucr_betas": ucr_betas, "ucr_glms": ucr_glms, "ext_betas": ext_betas, "ext_glms": ext_glms,
-            "stim_nodes": stim_nodes, "taskdata": taskdata, 'tasktiming': tasktiming})
+            "stim_nodes": stim_nodes, "taskdata": taskdata, 'tasktiming': tasktiming, 
+            'Tmax':Tmax, 'dt':dt, 'g':g, "s":s, 'tau': tau, 'stimtimes': stimtimes})
 
 
-def get_true_baseline(sim, tasktiming = None, sa = 500, ea = 1000, iv = 2000):    
+def get_true_baseline(sim):    
     
     """
     Get baselines for stimulated and non stimulated nodes against which GLM results will be compared
 
     Parameters:
         sim = simulation dictionary output from sim_network_task_glm
-        stim_nodes = nodes that are stimulated by the task
-        dt = sampling rate
-        stim_mag = stimulus magnitude
-        tasktiming = block task array is created if not specified. If specified must be of length Tmax/dt
-        sa = start point of stimulation
-        ea = end point of stimulation
-        iv = interstim interval
-
+        
     Returns: 
         baseline_vec = baseline for all nodes; task regression weights of stimulated nodes for noiseless data
         
@@ -352,14 +346,40 @@ def get_true_baseline(sim, tasktiming = None, sa = 500, ea = 1000, iv = 2000):
     
     baseline_vec = np.zeros(sim['W'].shape[0])
     
+    # Initialize parameters
+    W = sim['W']
+    Tmax= sim['Tmax']
+    dt=sim['dt']
+    g=sim['g']
+    s=sim['s']
+    tau=sim['tau'] 
+    I=sim['stimtimes']
+    stim_nodes = sim['stim_nodes']
+    tasktiming = sim['tasktiming']
+    
     # To get the baselines I need to run the task in the network without noise
+    # To run the task in the network without noise I need all of these parameters: 
+    taskdata, error = model.networkModel(W, Tmax=Tmax,dt=dt,g=g,s=s,tau=tau, I=I, noise=None)
     
     # Run the extended glm on this noiseless stimulation
+    # Use only a subset of data for GLM's if it's too long
+    if taskdata.shape[1]>44999:
+        short_lim = int(np.floor(taskdata.shape[1]/3))
+        y = copy.copy(taskdata[:,:short_lim])
+        task_reg = copy.copy(tasktiming[:short_lim])
+    else:
+        y = copy.copy(taskdata)
+        task_reg = copy.copy(tasktiming)
+        
+    
+    ext_model = run_ext_glm(all_nodes_ts = y, task_reg = task_reg, 
+                            weight_matrix = W, g = g, s = s)
     
     # Extract the task regression weights from these extended GLMs for stimulated nodes
+    ext_betas = ext_model["ext_task_betas"]
     
     # Replace the value of these stimulated nodes in the baseline_vec
-            
+    baseline_vec[stim_nodes] = ext_betas[stim_nodes]
     
     return(baseline_vec)
 
@@ -372,9 +392,7 @@ def plot_sim_network_glm(data,
                          ucr_label = "cGLM (baseline)",
                          ext_label = "eGLM (baseline)",
                          base_label = None,
-                         alp = 1,
-                         stim_nodes = range(11),
-                         tasktiming = None, sa = 500, ea = 1000, iv = 200):
+                         alp = 1):
     
     """
     Plotting wrapper comparing cGLM to eGLM results
@@ -401,6 +419,7 @@ def plot_sim_network_glm(data,
     """
     
     totalnodes = ncoms*nnods
+    stim_nodes = data['stim_nodes']
     
     plt.rcParams["figure.figsize"][0] = width
     plt.rcParams["figure.figsize"][1] = height
@@ -408,12 +427,8 @@ def plot_sim_network_glm(data,
     plt.plot(data['ucr_betas'], alpha = alp, color = "C0", label = ucr_label)
     plt.plot(data['ext_betas'], alpha = alp, color = "C1", label = ext_label)
     
-    baseline_vec = get_true_baseline(data, stim_nodes = stim_nodes, tasktiming = tasktiming, sa = sa, ea = ea, iv = iv)
-    
-
-    all_nodes = list(range(totalnodes))
-    stim_ind = [1 if x in data['stim_nodes'] else 0 for x in all_nodes]
-    #baseline_vec = [stim_baseline if x == 1 else nonstim_baseline for x in stim_ind]
+    baseline_vec = get_true_baseline(data)
+  
     plt.plot(baseline_vec, 
      color = "black", linestyle = '--', label = base_label, alpha = alp)
     
