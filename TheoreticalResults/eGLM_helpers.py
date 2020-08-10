@@ -112,7 +112,7 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, standardize=False):
     return ({"ext_task_betas": ext_task_betas,
                  "ext_mods": ext_mods})
         
-def make_stimtimes(Tmax, dt, stim_nodes, stim_mag, tasktiming=None, ncommunities = 3, nodespercommunity = 35,  sa = 500, ea = 1000, iv = 2000):
+def make_stimtimes(stim_nodes, Tmax=1000, dt=1, stim_mag=.5, tasktiming=None, ncommunities = 3, nodespercommunity = 35,  sa = 50, ea = 100, iv = 200):
     
     """
     Creates task timing and timeseries for all nodes in network
@@ -161,7 +161,7 @@ def sim_network_task_glm(ncommunities = 3,
                          dt = 1, tau = 1, g = 1, s = 1, 
                          topdown = True, bottomup = False, 
                          local_com = 1, 
-                         Tmax = 100000, 
+                         Tmax = 1000, 
                          plot_task = False, 
                          stimsize = np.floor(35/3.0), 
                          noise = None,
@@ -171,9 +171,9 @@ def sim_network_task_glm(ncommunities = 3,
                          W = None,
                          taskdata = None,
                          tasktiming = None,
-                         sa = 500,
-                         ea = 1000,
-                         iv = 2000,
+                         sa = 50,
+                         ea = 100,
+                         iv = 200,
                          standardize=False):
     
     """
