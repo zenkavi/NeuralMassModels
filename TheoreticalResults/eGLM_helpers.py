@@ -331,7 +331,7 @@ def sim_network_task_glm(ncommunities = 3,
             'Tmax':Tmax, 'dt':dt, 'g':g, "s":s, 'tau': tau, 'stimtimes': stimtimes})
 
 
-def get_true_baseline(sim):    
+def get_true_baseline(sim, stim_nodes_only=True):    
     
     """
     Get baselines for stimulated and non stimulated nodes against which GLM results will be compared
@@ -379,7 +379,10 @@ def get_true_baseline(sim):
     ext_betas = ext_model["ext_task_betas"]
     
     # Replace the value of these stimulated nodes in the baseline_vec
-    baseline_vec[stim_nodes] = ext_betas[stim_nodes]
+    if stim_nodes_only:
+        baseline_vec[stim_nodes] = ext_betas[stim_nodes]
+    else: 
+        baseline_vec = ext_betas
     
     return(baseline_vec)
 
@@ -392,7 +395,8 @@ def plot_sim_network_glm(data,
                          ucr_label = "cGLM (baseline)",
                          ext_label = "eGLM (baseline)",
                          base_label = None,
-                         alp = 1):
+                         alp = 1, 
+                         stim_nodes_only=True):
     
     """
     Plotting wrapper comparing cGLM to eGLM results
@@ -427,7 +431,7 @@ def plot_sim_network_glm(data,
     plt.plot(data['ucr_betas'], alpha = alp, color = "C0", label = ucr_label)
     plt.plot(data['ext_betas'], alpha = alp, color = "C1", label = ext_label)
     
-    baseline_vec = get_true_baseline(data)
+    baseline_vec = get_true_baseline(data, stim_nodes_only = stim_nodes_only)
   
     plt.plot(baseline_vec, 
      color = "black", linestyle = '--', label = base_label, alpha = alp)
