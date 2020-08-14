@@ -37,12 +37,7 @@ default_args = {'bottomup': False,
 def phi(x): 
     return(np.tanh(x))
 
-def generateStructuralNetwork(ncommunities=default_args['ncommunities'], 
-                              innetwork_dsity=default_args['innetwork_dsity'], 
-                              outnetwork_dsity=default_args['outnetwork_dsity'], 
-                              hubnetwork_dsity=default_args['hubnetwork_dsity'], 
-                              nodespercommunity=default_args['nodespercommunity'], 
-                              showplot=default_args['showplot']):
+def generateStructuralNetwork(args_dict = default_args):
     """
     Randomly generates a structural network with a single hub network
 
@@ -56,7 +51,15 @@ def generateStructuralNetwork(ncommunities=default_args['ncommunities'],
     Returns: 
         Unweighted structural connectivity matrix (with 1s indicating edges and 0s otherwise)
     """
-
+    
+    # Initialize parameters
+    ncommunities=args_dict['ncommunities']
+    innetwork_dsity=args_dict['innetwork_dsity']
+    outnetwork_dsity=args_dict['outnetwork_dsity']
+    hubnetwork_dsity=args_dict['hubnetwork_dsity']
+    nodespercommunity=args_dict['nodespercommunity']
+    showplot=args_dict['showplot']
+    
     totalnodes = nodespercommunity * ncommunities
 
     W = np.zeros((totalnodes,totalnodes))
@@ -146,16 +149,7 @@ def generateSynapticNetwork(W, showplot=default_args['showplot']):
         
     return G
 
-def networkModel(G, 
-                 Tmax=default_args['Tmax'],
-                 dt=default_args['dt'],
-                 g=default_args['g'],
-                 s=default_args['s'],
-                 tau=default_args['tau'],
-                 I=default_args['I'], 
-                 noise=default_args['noise'], 
-                 noise_loc = default_args['noise_loc'], 
-                 noise_scale = default_args['noise_scale']):
+def networkModel(G, args_dict = default_args):
     """
     G = Synaptic Weight Matrix
     Tmax = 100      (1sec / 1000ms)
@@ -167,6 +161,17 @@ def networkModel(G,
     
     
     """
+    # Initialize parameters
+    Tmax=args_dict['Tmax']
+    dt=args_dict['dt']
+    g=args_dict['g']
+    s=args_dict['s']
+    tau=args_dict['tau']
+    I=args_dict['I']
+    noise=args_dict['noise']
+    noise_loc = args_dict['noise_loc']
+    noise_scale = args_dict['noise_scale']
+       
     T = np.arange(0, Tmax, dt)
     totalnodes = G.shape[0]
   

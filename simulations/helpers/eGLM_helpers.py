@@ -103,16 +103,7 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, standardize=False):
     return ({"ext_task_betas": ext_task_betas,
                  "ext_mods": ext_mods})
         
-def make_stimtimes(stim_nodes, 
-                   Tmax=default_args['Tmax'], 
-                   dt=default_args['dt'], 
-                   stim_mag=default_args['stim_mag'], 
-                   tasktiming=default_args['tasktiming'], 
-                   ncommunities = default_args['ncommunities'], 
-                   nodespercommunity = default_args['nodespercommunity'],  
-                   sa = default_args['sa'], 
-                   ea = default_args['ea'], 
-                   iv = default_args['iv']):
+def make_stimtimes(stim_nodes, args_dict = default_args):
     
     """
     Creates task timing and timeseries for all nodes in network
@@ -131,6 +122,17 @@ def make_stimtimes(stim_nodes,
     Returns: 
         2D array with nodes in rows and time points in columns
     """
+    
+    # Initialize parameters
+    Tmax=args_dict['Tmax']
+    dt=args_dict['dt']
+    stim_mag=args_dict['stim_mag']
+    tasktiming=args_dict['tasktiming']
+    ncommunities = args_dict['ncommunities']
+    nodespercommunity = args_dict['nodespercommunity']
+    sa = args_dict['sa']
+    ea = args_dict['ea']
+    iv = args_dict['iv']
     
     totalnodes = nodespercommunity*ncommunities
     T = np.arange(0,Tmax,dt)
@@ -152,29 +154,7 @@ def make_stimtimes(stim_nodes,
             
     return(tasktiming, stimtimes)
 
-def sim_network_task_glm(ncommunities = default_args['ncommunities'], 
-                         innetwork_dsity = default_args['innetwork_dsity'], 
-                         outnetwork_dsity = default_args['outnetwork_dsity'], 
-                         hubnetwork_dsity = default_args['hubnetwork_dsity'], 
-                         nodespercommunity = default_args['nodespercommunity'], 
-                         plot_network = default_args['plot_network'],
-                         dt = default_args['dt'], tau = default_args['tau'], g = default_args['g'], s = default_args['s'], 
-                         topdown = default_args['topdown'], bottomup = default_args['bottomup'], 
-                         local_com = default_args['local_com'], 
-                         Tmax = default_args['Tmax'], 
-                         plot_task = default_args['plot_task'], 
-                         stimsize = default_args['stimsize'], 
-                         noise = default_args['noise'],
-                         noise_loc = default_args['noise_loc'], 
-                         noise_scale = default_args['noise_scale'],
-                         stim_mag = default_args['stim_mag'],
-                         W = default_args['W'],
-                         taskdata = default_args['taskdata'],
-                         tasktiming = default_args['tasktiming'],
-                         sa = default_args['sa'],
-                         ea = default_args['ea'],
-                         iv = default_args['iv'],
-                         standardize=default_args['standardize']):
+def sim_network_task_glm(args_dict = default_args):
     
     """
     Simulates task activity in network and runs both uncorrected and corrected GLMs to estimate task parameters
@@ -210,6 +190,37 @@ def sim_network_task_glm(ncommunities = default_args['ncommunities'],
     Returns: 
         Dictionary with weight matrix, corrected and uncorrected task parameters and model objects, stimulated nodes, timeseries for all nodes
     """
+    
+    
+    # Initialize parameters
+    ncommunities = args_dict['ncommunities']
+    innetwork_dsity = args_dict['innetwork_dsity']
+    outnetwork_dsity = args_dict['outnetwork_dsity']
+    hubnetwork_dsity = args_dict['hubnetwork_dsity']
+    nodespercommunity = args_dict['nodespercommunity']
+    plot_network = args_dict['plot_network']
+    dt = args_dict['dt']
+    tau = args_dict['tau']
+    g = args_dict['g']
+    s = args_dict['s']
+    topdown = args_dict['topdown']
+    bottomup = args_dict['bottomup'] 
+    local_com = args_dict['local_com']
+    Tmax = args_dict['Tmax']
+    plot_task = args_dict['plot_task']
+    stimsize = args_dict['stimsize']
+    noise = args_dict['noise']
+    noise_loc = args_dict['noise_loc']
+    noise_scale = args_dict['noise_scale']
+    stim_mag = args_dict['stim_mag']
+    W = args_dict['W']
+    taskdata = args_dict['taskdata']
+    tasktiming = args_dict['tasktiming']
+    sa = args_dict['sa']
+    ea = args_dict['ea']
+    iv = args_dict['iv']
+    standardize=args_dict['standardize']
+    
     
     #############################################
     # Create network
