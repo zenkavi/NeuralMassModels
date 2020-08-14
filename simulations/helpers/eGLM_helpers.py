@@ -1,50 +1,12 @@
 print("Importing eGLM helpers...")
-from collections import OrderedDict
 import copy
-import sys
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-sns.set_style("white")
-import scipy.stats as stats
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from sklearn.preprocessing import scale
 
-sys.path.append('../')
-sys.path.append('../../utils/')
-import model
-
-# Set default arguments that appear repeatadly in functions below
-default_args = {'bottomup': False, 
-                'dt':1,  
-                'ea':100,
-                'g':1, 
-                'hubnetwork_dsity': .25, 
-                'innetwork_dsity': .60,
-                'iv': 200,
-                'local_com': 1, 
-                'ncommunities': 3,
-                'noise': None,
-                'noise_loc': 0, 
-                'noise_scale': 0,
-                'nodespercommunity': 35,
-                'outnetwork_dsity':.08,
-                'plot_network': False,
-                'plot_task': False, 
-                's':1,
-                'sa':50,
-                'standardize':False,
-                'stim_mag':.5,
-                'stimsize': .33, 
-                'taskdata':None,
-                'tasktiming':None,
-                'tau':1, 
-                'Tmax':1000,
-                'topdown':True,
-                'W': None}
-
+from eGLM_model import default_args, generateStructuralNetwork, generateSynapticNetwork, networkModel
 
 def phi(x): 
     return(np.tanh(x))
