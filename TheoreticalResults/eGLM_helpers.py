@@ -14,8 +14,37 @@ from sklearn.preprocessing import scale
 
 sys.path.append('../')
 sys.path.append('../../utils/')
-# Primary module with most model functions
 import model
+
+# Set default arguments that appear repeatadly in functions below
+default_args = {'bottomup': False, 
+                'dt':1,  
+                'ea':100,
+                'g':1, 
+                'hubnetwork_dsity': .25, 
+                'innetwork_dsity': .60,
+                'iv': 200,
+                'local_com': 1, 
+                'ncommunities': 3,
+                'noise': None,
+                'noise_loc': 0, 
+                'noise_scale': 0,
+                'nodespercommunity ': 35,
+                'outnetwork_dsity':.08,
+                'plot_network': False,
+                'plot_task': False, 
+                's':1,
+                'sa':50,
+                'standardize':False
+                'stim_mag':.5,
+                'stimsize': .33, 
+                'taskdata':None,
+                'tasktiming':None,
+                'tau':1, 
+                'Tmax':1000,
+                'topdown':True,
+                'W': None}
+
 
 def phi(x): 
     return(np.tanh(x))
@@ -112,7 +141,16 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, standardize=False):
     return ({"ext_task_betas": ext_task_betas,
                  "ext_mods": ext_mods})
         
-def make_stimtimes(stim_nodes, Tmax=1000, dt=1, stim_mag=.5, tasktiming=None, ncommunities = 3, nodespercommunity = 35,  sa = 50, ea = 100, iv = 200):
+def make_stimtimes(stim_nodes, 
+                   Tmax=default_args['Tmax'], 
+                   dt=default_args['dt'], 
+                   stim_mag=default_args['stim_mag'], 
+                   tasktiming=default_args['tasktiming'], 
+                   ncommunities = default_args['ncommunities'], 
+                   nodespercommunity = default_args['nodespercommunity'],  
+                   sa = default_args['sa'], 
+                   ea = default_args['ea'], 
+                   iv = default_args['iv']):
     
     """
     Creates task timing and timeseries for all nodes in network
@@ -152,29 +190,29 @@ def make_stimtimes(stim_nodes, Tmax=1000, dt=1, stim_mag=.5, tasktiming=None, nc
             
     return(tasktiming, stimtimes)
 
-def sim_network_task_glm(ncommunities = 3, 
-                         innetwork_dsity = .60, 
-                         outnetwork_dsity = .08, 
-                         hubnetwork_dsity = .25, 
-                         nodespercommunity = 35, 
-                         plot_network = False,
-                         dt = 1, tau = 1, g = 1, s = 1, 
-                         topdown = True, bottomup = False, 
-                         local_com = 1, 
-                         Tmax = 1000, 
-                         plot_task = False, 
-                         stimsize = np.floor(35/3.0), 
-                         noise = None,
-                         noise_loc = 0, 
-                         noise_scale = 0,
-                         stim_mag = .5,
-                         W = None,
-                         taskdata = None,
-                         tasktiming = None,
-                         sa = 50,
-                         ea = 100,
-                         iv = 200,
-                         standardize=False):
+def sim_network_task_glm(ncommunities = default_args['ncommunities'], 
+                         innetwork_dsity = default_args['immetwork_dsity'], 
+                         outnetwork_dsity = default_args['outnetwork_dsity'], 
+                         hubnetwork_dsity = default_args['hubnetwork_dsity'], 
+                         nodespercommunity = default_args['nodespercommunity'], 
+                         plot_network = default_args['plot_network'],
+                         dt = default_args['dt'], tau = default_args['tau'], g = default_args['g'], s = default_args['s'], 
+                         topdown = default_args['topdown'], bottomup = default_args['bottomup'], 
+                         local_com = default_args['local_com'], 
+                         Tmax = default_args['Tmax'], 
+                         plot_task = default_args['plot_task'], 
+                         stimsize = default_args['stimsize'], 
+                         noise = default_args['noise'],
+                         noise_loc = default_args['noise_loc'], 
+                         noise_scale = default_args['noise_scale'],
+                         stim_mag = default_args['stim_mag'],
+                         W = default_args['W'],
+                         taskdata = default_args['taskdata'],
+                         tasktiming = default_args['tasktiming'],
+                         sa = default_args['sa'],
+                         ea = default_args['ea'],
+                         iv = default_args['iv'],
+                         standardize=default_args['standardize']):
     
     """
     Simulates task activity in network and runs both uncorrected and corrected GLMs to estimate task parameters
@@ -245,7 +283,9 @@ def sim_network_task_glm(ncommunities = 3,
     # Construct a community affiliation vector
     Ci = np.repeat(np.arange(ncommunities),nodespercommunity) 
     # Identify the regions associated with the hub network (hub network is by default the 0th network)
-    hub_ind = np.where(Ci==0)[0] 
+    hub_ind = np.where(Ci==0)[0]
+    
+    stimsize = int(np.floor(nodespercommunity*stimsize))
 
     if topdown:
         stim_nodes_td = np.arange(0, stimsize, dtype=int)
