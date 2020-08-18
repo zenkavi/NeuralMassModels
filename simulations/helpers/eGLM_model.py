@@ -109,7 +109,7 @@ def generateStructuralNetwork(args_dict = default_args):
     
     return W
 
-def generateSynapticNetwork(W, showplot=default_args['showplot']):
+def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1.0, weight_scale = .2):
     """
     Generate synaptic matrix over structural matrix with randomized gaussian weighs with
     mean = 1.0 and standard deviation of 0.2 (so all weights are positive)
@@ -126,7 +126,7 @@ def generateSynapticNetwork(W, showplot=default_args['showplot']):
     totalnodes = G.shape[0]
     connect_ind = np.where(W!=0)
     nconnects = len(connect_ind[0])
-    weights = np.random.normal(loc=1.0,scale=0.2, size=(nconnects,))
+    weights = np.random.normal(loc=weight_loc,scale=weight_scale, size=(nconnects,))
     G[connect_ind] = weights
     
     # Find num connections per node
