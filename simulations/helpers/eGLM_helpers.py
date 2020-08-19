@@ -383,6 +383,7 @@ def get_true_baseline(sim, stim_nodes_only=True):
     return(baseline_vec)
 
 def plot_sim_network_glm(sim,
+                         ax = None,
                          width = 8,
                          height = 6,
                          ncoms = 3,
@@ -421,23 +422,24 @@ def plot_sim_network_glm(sim,
     totalnodes = ncoms*nnods
     stim_nodes = sim['stim_nodes']
     
-    plt.rcParams["figure.figsize"][0] = width
-    plt.rcParams["figure.figsize"][1] = height
+    if ax is None:
+        ax = plt.gca()
+        plt.rcParams["figure.figsize"][0] = width
+        plt.rcParams["figure.figsize"][1] = height
     
-    plt.plot(sim['ucr_betas'], alpha = alp, color = "C0", label = ucr_label)
-    plt.plot(sim['ext_betas'], alpha = alp, color = "C1", label = ext_label)
+    ax.plot(sim['ucr_betas'], alpha = alp, color = "C0", label = ucr_label)
+    ax.plot(sim['ext_betas'], alpha = alp, color = "C1", label = ext_label)
     
     baseline_vec = get_true_baseline(sim, stim_nodes_only = stim_nodes_only)
   
-    plt.plot(baseline_vec, 
-     color = "black", linestyle = '--', label = base_label, alpha = alp)
+    ax.plot(baseline_vec, color = "black", linestyle = '--', label = base_label, alpha = alp)
     
-    plt.ylabel('Beta',fontsize=14)
-    plt.xlabel('Node',fontsize=14)
+    ax.set_ylabel('Beta',fontsize=14)
+    ax.set_xlabel('Node',fontsize=14)
     
     for n in range(1,ncoms):
-        plt.axvline(x=nnods*n,linewidth=2, color='gray', ls = "--")
+        ax.axvline(x=nnods*n,linewidth=2, color='gray', ls = "--")
     
-    plt.legend(loc="best")
+    ax.legend(loc="best")
 
 print("All eGLM helpers imported!")
