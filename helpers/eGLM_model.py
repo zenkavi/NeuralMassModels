@@ -1,3 +1,4 @@
+from copy import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -99,8 +100,10 @@ def generateStructuralNetwork(args_dict = default_args):
     np.fill_diagonal(W, 1)
 
     if showplot:
+        W_plot = copy(W)
+        np.fill_diagonal(W_plot, 0.5)
         plt.figure()
-        plt.imshow(W, origin='lower',cmap='bwr')
+        plt.imshow(W_plot, origin='lower',cmap='bwr')
         plt.title('Structural Matrix', y=1.08)
         plt.xlabel('Regions')
         plt.ylabel('Regions')
