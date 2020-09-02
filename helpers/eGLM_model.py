@@ -196,6 +196,10 @@ def networkModel(G, args_dict = default_args):
     Enodes[:,0] = Einit
 
     spont_act = np.zeros((totalnodes,))
+    
+    #DEBUGGING
+    k1s = np.zeros((totalnodes, len(T)-1))
+    k2s = np.zeros((totalnodes, len(T)-1))
 
     for t in range(len(T)-1):
 
@@ -215,5 +219,8 @@ def networkModel(G, args_dict = default_args):
         k2e = k2e/tau
 
         Enodes[:,t+1] = Enodes[:,t] + (.5*(k1e+k2e))*dt
+        k1s[:, t] = k1e
+        k2s[:, t] = k2e
 
-    return (Enodes, noise)
+#     return (Enodes, noise)
+    return (Enodes, noise, k1s, k2s)
