@@ -44,7 +44,7 @@ def run_ucr_glm(all_nodes_ts, task_reg, standardize=False):
     return ({"ucr_task_betas":ucr_task_betas,
              "ucr_mods": ucr_mods})
 
-def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, standardize=False): 
+def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, dt, tau, standardize=False): 
     
     """
     Runs extended GLM looping through each node of a network

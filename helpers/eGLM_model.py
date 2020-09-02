@@ -5,7 +5,7 @@ import pandas as pd
 
 # Set default arguments that appear repeatadly in functions below and downstream functions that import this script
 default_args = {'bottomup': False, 
-                'dt':1,  
+                'dt':.5,  
                 'ea':100,
                 'g':1, 
                 'hubnetwork_dsity': .25,
