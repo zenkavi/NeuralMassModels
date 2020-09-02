@@ -141,8 +141,8 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     # This timing is irrespective of the task being performed
     # Tasks are only determined by which nodes are stimulated
     if tasktiming is None:
-        tasktiming = np.zeros((len(Tmax)))
-        for t in range(len(Tmax)):
+        tasktiming = np.zeros((len(T)))
+        for t in range(len(T)):
             if t%iv>sa and t%iv<ea:
                 tasktiming[t] = 1.0
     
