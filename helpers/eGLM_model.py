@@ -207,6 +207,7 @@ def networkModel(G, args_dict = default_args):
         # With auto-correlation
         spont_act = (noise[:,t] + I[:,t])
         k1e = -Enodes[:,t] + g*np.dot(G,phi(spont_act)) # Coupling
+        #k1e = -Enodes[:,t] + g*np.dot(G,phi(Enodes[:,t]))
         k1e += s*phi(Enodes[:,t]) + spont_act# Local processing
         k1e = k1e/tau
         # 
@@ -215,6 +216,7 @@ def networkModel(G, args_dict = default_args):
         # With auto-correlation
         spont_act = (noise[:,t+1] + I[:,t+1])
         k2e = -ave + g*np.dot(G,phi(spont_act)) # Coupling
+        #k2e = -ave + g*np.dot(G,phi(ave))
         k2e += s*phi(ave) + spont_act # Local processing
         k2e = k2e/tau
 
