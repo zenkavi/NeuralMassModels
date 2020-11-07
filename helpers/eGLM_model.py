@@ -21,7 +21,7 @@ default_args = {'bottomup': False,
                 'outnetwork_dsity':.08,
                 'plot_network': False,
                 'plot_task': False, 
-                's':1,
+                's':.8,
                 'sa':100,
                 'showplot':False,
                 'standardize':False,
@@ -35,8 +35,11 @@ default_args = {'bottomup': False,
                 'W': None}
 
 
-def phi(x): 
+def phi(x):
+#     out = (np.exp(2*x) - 1)/(np.exp(2*x) + 1)
+#     return(out)
     return(np.tanh(x))
+    
 
 def generateStructuralNetwork(args_dict = default_args):
     """
@@ -97,11 +100,12 @@ def generateStructuralNetwork(args_dict = default_args):
                     W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
 
     # Make sure self-connections exist
-    np.fill_diagonal(W, 1)
+#     np.fill_diagonal(W, 1)
+    np.fill_diagonal(W, 0)
 
     if showplot:
         W_plot = copy(W)
-        np.fill_diagonal(W_plot, 0.5)
+#         np.fill_diagonal(W_plot, 0.5)
         plt.figure()
         plt.imshow(W_plot, origin='lower',cmap='bwr')
         plt.title('Structural Matrix', y=1.08)
@@ -158,7 +162,7 @@ def networkModel(G, args_dict = default_args):
     Tmax = 100      (1sec / 1000ms)
     dt = .1         (1ms)
     g = 1.0         Coupling 
-    s = 1.0         Self connection
+    s = 0.8         Self connection
     tau = 1.0       Time constant 
     I = 0.0         Stimulation/Task
     
@@ -187,7 +191,7 @@ def networkModel(G, args_dict = default_args):
     # Initial conditions and empty arrays
     Enodes = np.zeros((totalnodes,len(T)))
     # Initial conditions
-        # AZE: changing initial conditions to 0 if there is a task simulation
+        # Initial condition 0 if there is a task simulation
     if I is not None:
         Einit = np.zeros((totalnodes,))
     else:
@@ -197,32 +201,21 @@ def networkModel(G, args_dict = default_args):
 
     spont_act = np.zeros((totalnodes,))
     
-    #DEBUGGING
-    k1s = np.zeros((totalnodes, len(T)-1))
-    k2s = np.zeros((totalnodes, len(T)-1))
-
     for t in range(len(T)-1):
 
         ## Solve using Runge-Kutta Order 2 Method
-        # With auto-correlation
         spont_act = (noise[:,t] + I[:,t])
-        k1e = -Enodes[:,t] + g*np.dot(G,phi(spont_act)) # Coupling
-        #k1e = -Enodes[:,t] + g*np.dot(G,phi(Enodes[:,t]))
-        k1e += s*phi(Enodes[:,t]) + spont_act# Local processing
+        k1e = -Enodes[:,t] + g*np.dot(G,phi(Enodes[:,t]))
+        k1e += s*phi(Enodes[:,t]) + spont_act
         k1e = k1e/tau
         # 
         ave = Enodes[:,t] + k1e*dt
         #
-        # With auto-correlation
         spont_act = (noise[:,t+1] + I[:,t+1])
-        k2e = -ave + g*np.dot(G,phi(spont_act)) # Coupling
-        #k2e = -ave + g*np.dot(G,phi(ave))
-        k2e += s*phi(ave) + spont_act # Local processing
+        k2e = -ave + g*np.dot(G,phi(ave))
+        k2e += s*phi(ave) + spont_act
         k2e = k2e/tau
 
         Enodes[:,t+1] = Enodes[:,t] + (.5*(k1e+k2e))*dt
-        k1s[:, t] = k1e
-        k2s[:, t] = k2e
 
-#     return (Enodes, noise)
-    return (Enodes, noise, k1s, k2s)
+    return (Enodes, noise)
