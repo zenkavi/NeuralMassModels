@@ -68,9 +68,125 @@ data.frame(taskdata) %>%
   facet_wrap(~comm)+
   theme(legend.position = "bottom",
         legend.title = element_blank())+
-  guides(color = guide_legend(nrow=1))+
+  guides(color = guide_legend(nrow=3))+
   ylab("")+
   scale_color_manual(values = c("1" = "darkgoldenrod2", "2" = "deepskyblue3", "3" = "darkolivegreen4",
                                 "4" = "darkgoldenrod2", "5" = "deepskyblue3", "6" = "darkolivegreen4",
                                 "7" = "darkgoldenrod2", "8" = "deepskyblue3", "9" = "darkolivegreen4"))
 ```
+With the same network model activity propogation you have a network that does turn off in fit_nmm and one that doesn't turn off in this notebook (replicating the one in the python version).
+Why?
+
+Inspect each element of the intermediate output
+
+```{r}
+debugdata = networkModel(W$G, args_dict = sim_args, debug= T)
+debug_intout = debugdata$int_out
+names(debug_intout)
+```
+
+`spont_act1` (and `spont_act2`, not shown) looks correct. No stimulation for non-hub network nodes.
+
+```{r}
+data.frame(debug_intout$spont_act1) %>%
+  mutate(node = row.names(.),
+         comm = c(1,1,1,2,2,2,3,3,3)) %>%
+  gather(sampling, stim, -node, -comm) %>%
+  mutate(sampling = gsub("X", "", sampling),
+         sampling = as.numeric(sampling),
+         comm = as.factor(comm),
+         node = as.factor(node)) %>%
+  ggplot(aes(sampling, stim, color=node,))+
+  geom_line()+
+  facet_wrap(~comm)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())+
+  guides(color = guide_legend(nrow=3))+
+  ylab("")+
+  scale_color_manual(values = c("1" = "darkgoldenrod2", "2" = "deepskyblue3", "3" = "darkolivegreen4",
+                                "4" = "darkgoldenrod2", "5" = "deepskyblue3", "6" = "darkolivegreen4",
+                                "7" = "darkgoldenrod2", "8" = "deepskyblue3", "9" = "darkolivegreen4"))
+```
+`net_act1` looks wrong. Why is there a big jump the first time task turns on but not as big of a fall when task turns off?
+
+```{r}
+data.frame(debug_intout$net_act1) %>%
+  mutate(node = row.names(.),
+         comm = c(1,1,1,2,2,2,3,3,3)) %>%
+  gather(sampling, stim, -node, -comm) %>%
+  mutate(sampling = gsub("X", "", sampling),
+         sampling = as.numeric(sampling),
+         comm = as.factor(comm),
+         node = as.factor(node)) %>%
+  ggplot(aes(sampling, stim, color=node,))+
+  geom_line()+
+  facet_wrap(~comm)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())+
+  guides(color = guide_legend(nrow=3))+
+  ylab("")+
+  scale_color_manual(values = c("1" = "darkgoldenrod2", "2" = "deepskyblue3", "3" = "darkolivegreen4",
+                                "4" = "darkgoldenrod2", "5" = "deepskyblue3", "6" = "darkolivegreen4",
+                                "7" = "darkgoldenrod2", "8" = "deepskyblue3", "9" = "darkolivegreen4"))
+```
+
+```{r}
+data.frame(debug_intout$k1e) %>%
+  mutate(node = row.names(.),
+         comm = c(1,1,1,2,2,2,3,3,3)) %>%
+  gather(sampling, stim, -node, -comm) %>%
+  mutate(sampling = gsub("X", "", sampling),
+         sampling = as.numeric(sampling),
+         comm = as.factor(comm),
+         node = as.factor(node)) %>%
+  ggplot(aes(sampling, stim, color=node,))+
+  geom_line()+
+  facet_wrap(~comm)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())+
+  guides(color = guide_legend(nrow=3))+
+  ylab("")+
+  scale_color_manual(values = c("1" = "darkgoldenrod2", "2" = "deepskyblue3", "3" = "darkolivegreen4",
+                                "4" = "darkgoldenrod2", "5" = "deepskyblue3", "6" = "darkolivegreen4",
+                                "7" = "darkgoldenrod2", "8" = "deepskyblue3", "9" = "darkolivegreen4"))
+```
+```{r}
+which(debug_intout$spont_act1[1,] !=0)
+```
+
+```{r}
+round(debug_intout$k1e[1,100:105],3)
+```
+
+```{r}
+round(debug_intout$k1e[1,199:205], 3)
+```
+
+```{r}
+debugdata$Enodes[,100:105]
+```
+
+Summed network activity that will be added to each node at task turn on
+
+```{r}
+t = 101
+W$G %*% phi(debugdata$Enodes[,t])
+```
+
+What each node looks like when task is turned off at 200
+
+```{r}
+debugdata$Enodes[,199:205]
+# net_act = g*(W %*% phi(Enodes[,t]))
+```
+
+Summed network activity that will be added to each node
+
+```{r}
+t = 200
+W$G %*% phi(debugdata$Enodes[,t])
+```
+
+Activity will be decreasing, i.e. change will be negative driven by `-Enodes[,t]`.
+
+The first time the task is turned on this term is 0. So the added change is a sum of weighted network activity and the spont act. But after this the network is active

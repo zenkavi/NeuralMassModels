@@ -73,7 +73,9 @@ generateStructuralNetwork = function(args_dict){
     plt = data.frame(W) %>%
       mutate(to = row.names(.),
              from = names(.),
-             from = gsub("X","",from)) %>%
+             from = gsub("X","",from),
+             to = as.numeric(to),
+             from = as.numeric(to)) %>%
       gather(key, weight, -to, -from) %>%
       mutate(from = sort(from)) %>%
       select(-key) %>%
