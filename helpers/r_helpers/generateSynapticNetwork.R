@@ -27,7 +27,7 @@ generateSynapticNetwork = function(W, showplot=default_args['showplot'], weight_
   G = G/nodeDeg
 
   if (showplot){
-    data.frame(G) %>%
+    plt = data.frame(G) %>%
       mutate(to = row.names(.),
              from = names(.),
              from = gsub("X","",from)) %>%
@@ -36,7 +36,10 @@ generateSynapticNetwork = function(W, showplot=default_args['showplot'], weight_
       select(-key) %>%
       ggplot(aes(x=from, y=to, fill=weight))+
       geom_tile()
+    return(list(plt = plt, G=G) )
+  } else{
+    return(list(G=G))
   }
   
-  return(G) 
+
 }

@@ -28,15 +28,15 @@ generateStructuralNetwork = function(args_dict){
   nodecount = 0
   for (i in 1:ncommunities){
     for (j in 1:ncommunities){
-      for (node in 1:nodespercommunity){
+      #for (node in 1:nodespercommunity){
         # Set within network community connections
         if (i==j){
-          tmp_a = matrix(rnorm(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<innetwork_dsity
+          tmp_a = matrix(runif(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<innetwork_dsity
           indstart = (i-1)*nodespercommunity+1
           indend = (i-1)*nodespercommunity+nodespercommunity
           W[indstart:indend,indstart:indend] = tmp_a
         } else{
-          tmp_b = matrix(rnorm(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<outnetwork_dsity
+          tmp_b = matrix(runif(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<outnetwork_dsity
           indstart_i = (i-1)*nodespercommunity+1
           indend_i = (i-1)*nodespercommunity + nodespercommunity
           indstart_j = (j-1)*nodespercommunity+1
@@ -45,7 +45,7 @@ generateStructuralNetwork = function(args_dict){
         }
       }
     }
-  }
+  #}
     
   
   # Redo a community as a hub-network
@@ -70,7 +70,7 @@ generateStructuralNetwork = function(args_dict){
   diag(W) = 0
   
   if (showplot){
-    data.frame(W) %>%
+    plt = data.frame(W) %>%
       mutate(to = row.names(.),
              from = names(.),
              from = gsub("X","",from)) %>%
@@ -79,9 +79,12 @@ generateStructuralNetwork = function(args_dict){
       select(-key) %>%
       ggplot(aes(x=from, y=to, fill=weight))+
       geom_tile() 
+    return(list(plt = plt , W = W))
+  } else {
+    return(list(W = W))
   }
   
-  return(W)
+  
 }
 
 

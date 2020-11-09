@@ -3,9 +3,36 @@ title: "NB1_Minimal_model"
 ---
 
 ```{r}
-helpers_path = '~/Dropbox/RangelLab/NetworkGLM/r_helpers/'
+helpers_path = '~/Dropbox/RangelLab/NetworkGLM/helpers/r_helpers/'
 source(paste0(helpers_path,'networkModel.R'))
-source(paste0(helpers_path,'make_stimtimesk.R'))
+source(paste0(helpers_path,'make_stimtimes.R'))
 source(paste0(helpers_path,'generateStructuralNetwork.R'))
 source(paste0(helpers_path,'generateSynapticNetwork.R'))
+```
+
+Check translation of network creation functions to match previous network notebooks.
+Check activity propogation in previous notebooks to match activity here.
+
+```{r}
+sim_args = default_args_dict
+sim_args$hubnetwork_dsity = .5
+sim_args$nodespercommunity = 3
+sim_args$showplot = TRUE
+sim_args
+```
+
+```{r}
+S = generateStructuralNetwork(args_dict = sim_args)
+S$plt +
+  geom_vline(aes(xintercept = 3.5))+
+  geom_vline(aes(xintercept = 6.5))+
+  geom_hline(aes(yintercept = 3.5))+
+  geom_hline(aes(yintercept = 6.5))+
+  coord_fixed()+
+  scale_fill_gradientn(colors=c("blue", "red"), values = c(0,1))
+
+```
+
+```{r}
+W = generateSynapticNetwork(S$W, showplot=FALSE)
 ```
