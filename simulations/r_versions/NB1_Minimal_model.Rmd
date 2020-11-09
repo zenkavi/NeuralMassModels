@@ -10,9 +10,6 @@ source(paste0(helpers_path,'generateStructuralNetwork.R'))
 source(paste0(helpers_path,'generateSynapticNetwork.R'))
 ```
 
-Check translation of network creation functions to match previous network notebooks.
-Check activity propogation in previous notebooks to match activity here.
-
 ```{r}
 sim_args = default_args_dict
 sim_args$hubnetwork_dsity = .5
@@ -58,5 +55,22 @@ taskdata = networkModel(W$G, args_dict = sim_args)
 ```
 
 ```{r}
-taskdata
+data.frame(taskdata) %>%
+  mutate(node = row.names(.),
+         comm = c(1,1,1,2,2,2,3,3,3)) %>%
+  gather(sampling, stim, -node, -comm) %>%
+  mutate(sampling = gsub("X", "", sampling),
+         sampling = as.numeric(sampling),
+         comm = as.factor(comm),
+         node = as.factor(node)) %>%
+  ggplot(aes(sampling, stim, color=node,))+
+  geom_line()+
+  facet_wrap(~comm)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())+
+  guides(color = guide_legend(nrow=1))+
+  ylab("")+
+  scale_color_manual(values = c("1" = "darkgoldenrod2", "2" = "deepskyblue3", "3" = "darkolivegreen4",
+                                "4" = "darkgoldenrod2", "5" = "deepskyblue3", "6" = "darkolivegreen4",
+                                "7" = "darkgoldenrod2", "8" = "deepskyblue3", "9" = "darkolivegreen4"))
 ```
