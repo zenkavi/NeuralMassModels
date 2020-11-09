@@ -1,0 +1,11 @@
+---
+title: "NB1_Minimal_model"
+---
+
+```{r}
+helpers_path = '~/Dropbox/RangelLab/NetworkGLM/r_helpers/'
+source(paste0(helpers_path,'networkModel.R'))
+source(paste0(helpers_path,'make_stimtimesk.R'))
+source(paste0(helpers_path,'generateStructuralNetwork.R'))
+source(paste0(helpers_path,'generateSynapticNetwork.R'))
+```
