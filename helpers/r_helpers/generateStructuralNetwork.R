@@ -54,7 +54,7 @@ generateStructuralNetwork = function(args_dict){
     for (i in 1:ncommunities){
       for (j in 1:ncommunities){
         if( (i==hubnetwork | j==hubnetwork) & i!=j){
-          tmp_b = matrix(rnorm(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<hubnetwork_dsity
+          tmp_b = matrix(runif(nodespercommunity*nodespercommunity), nrow=nodespercommunity)<hubnetwork_dsity
           indstart_i = (i-1)*nodespercommunity+1
           indend_i = (i-1)*nodespercommunity + nodespercommunity
           indstart_j = (j-1)*nodespercommunity+1

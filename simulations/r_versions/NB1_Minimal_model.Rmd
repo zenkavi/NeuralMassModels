@@ -36,3 +36,27 @@ S$plt +
 ```{r}
 W = generateSynapticNetwork(S$W, showplot=FALSE)
 ```
+
+```{r}
+stim_nodes_td = c(1,2,3)
+tmp = make_stimtimes(stim_nodes = stim_nodes_td, args_dict = sim_args)
+tasktiming = tmp$tasktiming
+stimtimes = tmp$stimtimes
+rm(tmp)
+data.frame(stim = tasktiming) %>%
+  mutate(sampling = 1:n()) %>%
+  ggplot(aes(x = sampling, y = stim))+
+  geom_line()+
+  ylab("")+
+  scale_y_continuous(breaks=c(0,1))
+```
+
+
+```{r}
+sim_args$I = stimtimes
+taskdata = networkModel(W$G, args_dict = sim_args)
+```
+
+```{r}
+taskdata
+```

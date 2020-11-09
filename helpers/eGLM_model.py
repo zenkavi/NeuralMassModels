@@ -71,20 +71,20 @@ def generateStructuralNetwork(args_dict = default_args):
     nodecount = 0
     for i in range(ncommunities):
         for j in range(ncommunities):
-            for node in range(nodespercommunity):
-                # Set within network community connections
-                if i==j:
-                    tmp_a = np.random.rand(nodespercommunity,nodespercommunity)<innetwork_dsity
-                    indstart = i*nodespercommunity
-                    indend = i*nodespercommunity+nodespercommunity
-                    W[indstart:indend,indstart:indend] = tmp_a
-                else:
-                    tmp_b = np.random.rand(nodespercommunity,nodespercommunity)<outnetwork_dsity
-                    indstart_i = i*nodespercommunity
-                    indend_i = i*nodespercommunity + nodespercommunity
-                    indstart_j = j*nodespercommunity
-                    indend_j = j*nodespercommunity + nodespercommunity
-                    W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
+            #for node in range(nodespercommunity):
+            # Set within network community connections
+            if i==j:
+                tmp_a = np.random.rand(nodespercommunity,nodespercommunity)<innetwork_dsity
+                indstart = i*nodespercommunity
+                indend = i*nodespercommunity+nodespercommunity
+                W[indstart:indend,indstart:indend] = tmp_a
+            else:
+                tmp_b = np.random.rand(nodespercommunity,nodespercommunity)<outnetwork_dsity
+                indstart_i = i*nodespercommunity
+                indend_i = i*nodespercommunity + nodespercommunity
+                indstart_j = j*nodespercommunity
+                indend_j = j*nodespercommunity + nodespercommunity
+                W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
 
     # Redo a community as a hub-network
     hubnetwork = 0
@@ -109,8 +109,8 @@ def generateStructuralNetwork(args_dict = default_args):
         plt.figure()
         plt.imshow(W_plot, origin='lower',cmap='bwr')
         plt.title('Structural Matrix', y=1.08)
-        plt.xlabel('Regions')
-        plt.ylabel('Regions')
+        plt.xlabel('From')
+        plt.ylabel('To')
         plt.colorbar()
         plt.tight_layout()
     
