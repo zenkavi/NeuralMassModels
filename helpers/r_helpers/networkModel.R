@@ -67,7 +67,7 @@ networkModel = function(W, args_dict, old=FALSE, debug = FALSE){
   if (!is.null(I)){
       Einit = matrix(0, totalnodes, 1)
   } else {
-    Enit  = matrix(rnorm(totalnodes), totalnodes, 1)
+    Einit  = matrix(runif(totalnodes), totalnodes, 1)
   }
   
   # Assign initial values to first time point of all nodes
