@@ -112,8 +112,8 @@ networkModel = function(W, args_dict, old=FALSE, debug = FALSE){
     # Debugging    
     if(debug){
       int_out$ave[,t] = ave
-      int_out$net_act2[,t] = net_act
       int_out$spont_act2[,t] = spont_act
+      int_out$net_act2[,t] = net_act
       int_out$k2e[,t] = k2e
     }
     

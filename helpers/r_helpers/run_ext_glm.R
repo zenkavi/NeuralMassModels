@@ -16,8 +16,8 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
     I_t = all_nodes_ts$int_out$spont_act1[node,]
     I_t_dt = all_nodes_ts$int_out$spont_act2[node,]
   } else {
-    I_t = task_reg[-1]
-    I_t_dt = task_reg[-length(task_reg)]
+    I_t = task_reg[-length(task_reg)]
+    I_t_dt = task_reg[-1]
   }
   
   g_N_t_dt = all_nodes_ts$int_out$net_act2[node,]
