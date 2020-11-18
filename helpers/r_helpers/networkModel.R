@@ -39,6 +39,8 @@ networkModel = function(W, args_dict, old=FALSE, debug = FALSE){
   dt=args_dict$dt
   g=args_dict$g
   s=args_dict$s
+  #From http://apmonitor.com/pdc/index.php/Main/FirstOrderSystems
+  #"The process time constant (tau) is therefore the amount of time needed for the output to reach (1-exp(-1)) or 63.2% of the way to steady state conditions."
   tau=args_dict$tau
   I=args_dict$I
   noise=args_dict$noise
