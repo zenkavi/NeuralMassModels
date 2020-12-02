@@ -1,7 +1,6 @@
 run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
   
   s = args_dict$s
-  
   dt = args_dict$dt
   tau = args_dict$tau
   
@@ -37,15 +36,18 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
     x_t = all_nodes_ts[node, -ncol(all_nodes_ts)]
     
     g = args_dict$g
-    g_N_t = ...
+    W = args_dict$W
+    
+    net_act = g*(W[node,] %*% phi(all_nodes_ts))
+    g_N_t = net_act[-ncol(all_nodes_ts)]
     
     s_phi_x_t = s * phi(x_t)
     
     I_t = task_reg[-length(task_reg)]
     I_t_dt = task_reg[-1]
     
-    g_N_t_dt = ...
-    
+    g_N_t_dt = net_act[-1]
+  
     s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   }
   
@@ -58,7 +60,12 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
 
 run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL){
   
-  num_nodes = dim(all_nodes_ts$Enodes)[1]
+  
+  if(length(all_nodes_ts) == 2){
+    num_nodes = dim(all_nodes_ts$Enodes)[1]
+  } else {
+    num_nodes = dim(all_nodes_ts)[1]
+  }
   
   out = list(ext_task_betas = rep(NA, num_nodes),
              ext_mods = list())
