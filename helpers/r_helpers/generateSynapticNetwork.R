@@ -1,4 +1,4 @@
-generateSynapticNetwork = function(W, showplot=default_args['showplot'], weight_loc = 1.0, weight_scale = .2){
+generateSynapticNetwork = function(W, showplot=args_dict['showplot'], weight_loc = 1.0, weight_scale = .2){
   # """
   #   Generate synaptic matrix over structural matrix with randomized gaussian weighs with
   #   mean = 1.0 and standard deviation of 0.2 (so all weights are positive)

@@ -1,4 +1,4 @@
-run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
+run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, net_act=TRUE){
   
   s = args_dict$s
   dt = args_dict$dt
@@ -60,14 +60,22 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
     s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   }
   
-  mod = lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
+  if (net_act[1]==TRUE){
+    mod = lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
+  } else {
+    mod = lm(x_t_dt ~ -1 + x_t + s_phi_x_t + I_t + I_t_dt)
+  }
+
+  # mod = ifelse(net_act, 
+  #              lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt),
+  #              lm(x_t_dt ~ -1 + x_t + s_phi_x_t + I_t + I_t_dt))
   
   out = list(mod_df = mod$model, coef = coef(mod)['I_t_dt'])
   
   return(out)
 }
 
-run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL){
+run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL, net_act = TRUE){
   
   
   if(length(all_nodes_ts) == 2){
@@ -80,7 +88,7 @@ run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL){
              ext_mods = list())
   
   for(node in 1:num_nodes){
-    node_out = run_ext_glm_node(node, all_nodes_ts, args_dict, task_reg)
+    node_out = run_ext_glm_node(node, all_nodes_ts, args_dict, task_reg, net_act = net_act)
     out$ext_mods[[node]] = node_out$mod_df
     out$ext_task_betas[node] = node_out$coef
   }
