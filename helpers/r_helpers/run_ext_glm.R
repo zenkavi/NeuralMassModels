@@ -60,7 +60,7 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
     s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   }
   
-  mod = lm(x_t_dt ~ -1 +x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
+  mod = lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
   
   out = list(mod_df = mod$model, coef = coef(mod)['I_t_dt'])
   
