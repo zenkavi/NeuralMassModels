@@ -1,28 +1,53 @@
 run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
   
   s = args_dict$s
+  
   dt = args_dict$dt
   tau = args_dict$tau
   
-  x_t_dt = all_nodes_ts$Enodes[node,-1]
-  
-  x_t = all_nodes_ts$Enodes[node, -ncol(all_nodes_ts$Enodes)]
-  
-  g_N_t = all_nodes_ts$int_out$net_act1[node,]
-  
-  s_phi_x_t = s * phi(x_t)
-  
-  if(is.null(task_reg)){
-    I_t = all_nodes_ts$int_out$spont_act1[node,]
-    I_t_dt = all_nodes_ts$int_out$spont_act2[node,]
-  } else {
+  #if debug output it provided
+  if(length(all_nodes_ts) == 2){
+    
+    x_t_dt = all_nodes_ts$Enodes[node,-1]
+    
+    x_t = all_nodes_ts$Enodes[node, -ncol(all_nodes_ts$Enodes)]
+    
+    # Because the network activity regressor is extracted from the debug output 
+    # changing the connectivity matrix W in args_dict does not affect the results
+    g_N_t = all_nodes_ts$int_out$net_act1[node,]
+    
+    s_phi_x_t = s * phi(x_t)
+    
+    if(is.null(task_reg)){
+      I_t = all_nodes_ts$int_out$spont_act1[node,]
+      I_t_dt = all_nodes_ts$int_out$spont_act2[node,]
+    } else {
+      I_t = task_reg[-length(task_reg)]
+      I_t_dt = task_reg[-1]
+    }
+    
+    g_N_t_dt = all_nodes_ts$int_out$net_act2[node,]
+    
+    s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t))) 
+    
+  } else { #if only timeseries data is provided
+    
+    x_t_dt = all_nodes_ts[node,-1]
+    
+    x_t = all_nodes_ts[node, -ncol(all_nodes_ts)]
+    
+    g = args_dict$g
+    g_N_t = ...
+    
+    s_phi_x_t = s * phi(x_t)
+    
     I_t = task_reg[-length(task_reg)]
     I_t_dt = task_reg[-1]
+    
+    g_N_t_dt = ...
+    
+    s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   }
-  
-  g_N_t_dt = all_nodes_ts$int_out$net_act2[node,]
-  
-  s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   
   mod = lm(x_t_dt ~ -1 +x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
   
