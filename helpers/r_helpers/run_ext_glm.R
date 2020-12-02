@@ -37,16 +37,25 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL){
     
     g = args_dict$g
     W = args_dict$W
-    
-    net_act = g*(W[node,] %*% phi(all_nodes_ts))
-    g_N_t = net_act[-ncol(all_nodes_ts)]
+  
+    # 3x3 . 3x201 = 1x201 network activity to be added for allnode at each time point
+    net_act = g*(W %*% phi(all_nodes_ts)) 
+
+    # Drop last time point for network activity that'll be added from given time point to current node only 
+    g_N_t = net_act[node, -ncol(all_nodes_ts)]
     
     s_phi_x_t = s * phi(x_t)
     
     I_t = task_reg[-length(task_reg)]
     I_t_dt = task_reg[-1]
     
-    g_N_t_dt = net_act[-1]
+    # for ave to be for all nodes k1e needs to be for all nodes as well
+    k1e = -all_nodes_ts + net_act + s * phi(all_nodes_ts) + args_dict$I
+    k1e = k1e/tau
+    # ave needs to be for all nodes
+    ave = all_nodes_ts + k1e*dt
+    g_N_t_dt = g*(W[node,] %*% phi(ave))
+    g_N_t_dt = g_N_t_dt[-ncol(all_nodes_ts)]
   
     s_phi_ave = s * phi(((1 - (dt/tau))*x_t)+((dt/tau)*(g_N_t+s_phi_x_t+I_t)))
   }
