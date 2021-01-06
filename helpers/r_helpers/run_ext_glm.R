@@ -1,4 +1,4 @@
-run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_net_act=TRUE){
+run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_net_act=TRUE, inc_self_stim=TRUE){
   
   s = args_dict$s
   dt = args_dict$dt
@@ -38,7 +38,7 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_ne
     g = args_dict$g
     W = args_dict$W
   
-    # 3x3 . 3x201 = 1x201 network activity to be added for allnode at each time point
+    # 3x3 . 3x201 = 1x201 network activity to be added for all node at each time point
     net_act = g*(W %*% phi(all_nodes_ts)) 
 
     # Drop last time point for network activity that'll be added from given time point to current node only 
@@ -61,17 +61,21 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_ne
   }
   
   if (inc_net_act[1]==TRUE){
-    mod = lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
+    if (inc_self_stim[1]==TRUE){
+      mod = lm(x_t_dt ~ -1 + x_t + g_N_t + s_phi_x_t + I_t + g_N_t_dt + s_phi_ave + I_t_dt)
+    } else {
+      mod = lm(x_t_dt ~ -1 + x_t + g_N_t + I_t + g_N_t_dt + I_t_dt)
+    }
   } else {
     mod = lm(x_t_dt ~ -1 + x_t + s_phi_x_t + I_t + I_t_dt)
-  }
+  } #if both are false then it's uncorrected GLM
 
   out = list(mod_df = mod$model, coef = coef(mod)['I_t_dt'])
   
   return(out)
 }
 
-run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL, inc_net_act = TRUE){
+run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL, inc_net_act = TRUE, inc_self_stim = TRUE){
   
   
   if(length(all_nodes_ts) == 2){
@@ -84,7 +88,7 @@ run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL, inc_net_act = TRU
              ext_mods = list())
   
   for(node in 1:num_nodes){
-    node_out = run_ext_glm_node(node, all_nodes_ts, args_dict, task_reg, inc_net_act = inc_net_act)
+    node_out = run_ext_glm_node(node, all_nodes_ts, args_dict, task_reg, inc_net_act = inc_net_act, inc_self_stim=inc_self_stim)
     out$ext_mods[[node]] = node_out$mod_df
     out$ext_task_betas[node] = node_out$coef
   }
