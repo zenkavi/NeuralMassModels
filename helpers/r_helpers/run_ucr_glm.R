@@ -1,7 +1,11 @@
 
 run_ucr_glm_node = function(node, all_nodes_ts, task_reg=NULL){
   
-  x_t = all_nodes_ts$Enodes[node, -ncol(all_nodes_ts$Enodes)]
+  if(length(all_nodes_ts) == 2){
+    x_t = all_nodes_ts$Enodes[node, -ncol(all_nodes_ts$Enodes)]
+  } else {
+    x_t = all_nodes_ts[node, -ncol(all_nodes_ts)]
+  }
   
   if(is.null(task_reg)){
     I_t = all_nodes_ts$int_out$spont_act1[node,]  
@@ -17,7 +21,11 @@ run_ucr_glm_node = function(node, all_nodes_ts, task_reg=NULL){
 
 run_ucr_glm = function(all_nodes_ts, task_reg=NULL){
   
-  num_nodes = dim(all_nodes_ts$Enodes)[1]
+  if(length(all_nodes_ts) == 2 ){
+    num_nodes = dim(all_nodes_ts$Enodes)[1]
+  } else {
+    num_nodes = dim(all_nodes_ts)[1]
+  }
   
   out = list(ucr_task_betas = rep(NA, num_nodes),
              ucr_mods = list())
