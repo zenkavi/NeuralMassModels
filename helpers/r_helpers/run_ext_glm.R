@@ -68,7 +68,7 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_ne
     }
   } else {
     mod = lm(x_t_dt ~ -1 + x_t + s_phi_x_t + I_t + I_t_dt)
-  } #if both are false then it's uncorrected GLM
+  } #if both are false then it's uncorrected GLM (so not including that condition in this function)
 
   out = list(mod_df = mod$model, coef = coef(mod)['I_t_dt'])
   

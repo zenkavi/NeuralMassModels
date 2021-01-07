@@ -33,7 +33,7 @@ default_args_dict = list('bottomup'= FALSE,
                  'topdown'=TRUE,
                  'W'= NULL)
 
-networkModel = function(W, args_dict, old=FALSE, debug = FALSE){
+networkModel = function(W, args_dict, debug = FALSE){
   
   Tmax=args_dict$Tmax
   dt=args_dict$dt

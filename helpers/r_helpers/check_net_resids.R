@@ -1,4 +1,4 @@
-check_net_resids = function(node, all_nodes_ts, args_dict, excl_I = FALSE, verbose=FALSE){
+check_net_resids = function(node, all_nodes_ts, args_dict, excl_I = FALSE, inc_comps=FALSE){
   
   x_t_dt = all_nodes_ts$Enodes[node,-1]
   dt = args_dict$dt
@@ -23,7 +23,7 @@ check_net_resids = function(node, all_nodes_ts, args_dict, excl_I = FALSE, verbo
     rhs = (const1 * x_t) + const2 * (const2_1 * (g_N_t + s_phi_x_t + I_t) + g_N_t_dt + s_phi_ave + I_t_dt) 
   }
   
-  if(verbose){
+  if(inc_comps){
     out = data.frame(const1, x_t, const2, const2_1, g_N_t, s_phi_x_t, I_t, g_N_t_dt, s_phi_ave, I_t_dt)
     return(out)
   } else {
