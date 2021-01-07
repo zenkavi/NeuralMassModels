@@ -44,23 +44,26 @@ def run_ucr_glm(all_nodes_ts, task_reg, standardize=False):
     return ({"ucr_task_betas":ucr_task_betas,
              "ucr_mods": ucr_mods})
 
-def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, dt, tau, standardize=False): 
+def run_ext_glm(all_nodes_ts, args_dict, task_reg, inc_net_act=True, inc_self_stim=True): 
     
     """
     Runs extended GLM looping through each node of a network
 
     Parameters:
         all_nodes_ts = time series of all nodes in the network (DVs for GLM). 2D array with nodes for rows and time points for columns
+        args_dict = dictionary with parameters and adjacency matrix used for the simulation of the timeseries
         task_reg = task regressor (IV for GLM)
-        weight_matrix = weight matrix containing the connectivity weights for the network
-        g = global information transfer strength
-        s = local/self information transfer strength
 
     Returns: 
         Dictionary with two items
         ext_task_betas = corrected task parameter estimates
         ext_mods = sm.OLS objects from which the task parameters come from
     """
+    
+    s = args_dict['s']
+    dt = args_dict['dt']
+    tau = args_dict['tau']
+    weight_matrix = args_dict['W']
     
     nregions = all_nodes_ts.shape[0]
     ext_task_betas = np.zeros((nregions))
@@ -69,37 +72,8 @@ def run_ext_glm(all_nodes_ts, task_reg, weight_matrix, g, s, dt, tau, standardiz
     # This is external; don't know how the task affects a node
     i_t = task_reg[:-1]
        
-    for node in range(0, nregions):
+#     for node in range(0, nregions):
         #Drop the first time point
-        y = all_nodes_ts[node,1:]
-
-        #Drop last time point
-        s_phi_x = s*phi(all_nodes_ts[node,:-1])
-
-        g_w_phi_x = np.delete(all_nodes_ts, node, axis=0)[:,:-1]
-        g_w_phi_x = np.apply_along_axis(phi, 0, g_w_phi_x)
-        cur_w = np.delete(weight_matrix[node,:], node, axis=0)
-        cur_w = cur_w.reshape(-1,1)
-        g_w_phi_x = cur_w * g_w_phi_x
-        g_w_phi_x = np.sum(g_w_phi_x, axis=0)
-        g_w_phi_x = g*g_w_phi_x      
-        
-        #All IVs in design matrix
-        mod_df = pd.DataFrame(data = {"y": y, "s_phi_x":s_phi_x, "g_w_phi_x":g_w_phi_x, "i_t":i_t})
-        
-        s_df = pd.DataFrame(scale(mod_df))
-        s_df.rename(columns={i:j for i,j in zip(s_df.columns,mod_df.columns)}, inplace=True)
-        
-        if standardize:
-            ext_mod = smf.ols(formula = 'y ~ s_phi_x + g_w_phi_x + i_t', data = s_df)
-        else:
-            ext_mod = smf.ols(formula = 'y ~ s_phi_x + g_w_phi_x + i_t', data = mod_df)
-        
-        ext_res = ext_mod.fit()
-        ext_params = ext_res.params
-
-        ext_task_betas[node] = ext_params["i_t"]
-        ext_mods.append(ext_mod)
         
     return ({"ext_task_betas": ext_task_betas,
                  "ext_mods": ext_mods})
