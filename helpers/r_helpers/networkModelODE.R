@@ -17,19 +17,18 @@ dx_dt = function(t, state, params){
   noise_scale = params$noise_scale
   W = params$W
   
-  if("I" %in% names(params)){
-    I = params$I
-  } 
-  
   for(i in 1:num_nodes){
     noise = rnorm(1, mean = 0, sd = noise_scale)
+    
     if("I" %in% names(params)){
-      spont_act = I[i, t] + noise
-    } else{
-      spont_act = noise
+      interpol <- approxfun(seq(1, params$Tmax, params$dt), params$I[i,],rule=2,method='linear')
+      I = interpol(t)
+    } else {
+      I = 0
     }
-    print(spont_act)
-    # dxdt[i] = (-state[i] + s*phi(state[i]) + g * (W[i,] %*% state) + spont_act)/tau
+    
+    spont_act = I + noise
+    dxdt[i] = (-state[i] + s*phi(state[i]) + g * (W[i,] %*% state) + spont_act)/tau
     dxdt[i] = 0
   }
   
