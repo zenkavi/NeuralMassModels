@@ -21,15 +21,16 @@ dx_dt = function(t, state, params){
     noise = rnorm(1, mean = 0, sd = noise_scale)
     
     if("I" %in% names(params)){
-      interpol <- approxfun(seq(1, params$Tmax, params$dt), params$I[i,],rule=2,method='linear')
+      tmp = data.frame(time = seq(1, params$Tmax, params$dt), stim = params$I[i,])
+      interpol <- with(tmp, approxfun(time,stim))
       I = interpol(t)
+      I = ifelse(is.na(I), 0, I)
     } else {
       I = 0
     }
     
     spont_act = I + noise
     dxdt[i] = (-state[i] + s*phi(state[i]) + g * (W[i,] %*% state) + spont_act)/tau
-    dxdt[i] = 0
   }
   
   return(list(dxdt))
