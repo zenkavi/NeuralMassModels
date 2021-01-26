@@ -33,9 +33,11 @@ make_stimtimes = function(stim_nodes, args_dict){
   }
   
   # resampled task length depending on sampling rate dt
-  TT = seq(1,Tmax,dt)
+  # TT = seq(1,Tmax,dt)
+  TT = seq(0,Tmax,dt)
   
-  # Check if there is a specified in the inputs 
+  
+  # Check if there is a taasktiming specified in the inputs 
   tasktiming=args_dict$tasktiming
   if (is.null(tasktiming)){    
     # If not task specified create task timing

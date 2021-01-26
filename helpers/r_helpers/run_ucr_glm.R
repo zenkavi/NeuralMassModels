@@ -1,15 +1,13 @@
+helpers_path = '~/Dropbox/RangelLab/NetworkGLM/helpers/r_helpers/'
+source(paste0(helpers_path,'extract_ts_matrix.R'))
 
 run_ucr_glm_node = function(node, all_nodes_ts, task_reg=NULL){
   
+  all_nodes_ts = extract_ts_matrix(all_nodes_ts)
   
   x_t = all_nodes_ts[node, -ncol(all_nodes_ts)]
   
-  
-  if(is.null(task_reg)){
-    I_t = all_nodes_ts$int_out$spont_act1[node,]  
-  } else{
-    I_t = task_reg[-length(task_reg)]
-  }
+  I_t = task_reg[-length(task_reg)]
   
   mod = lm(x_t ~ -1+I_t)
   
@@ -18,6 +16,8 @@ run_ucr_glm_node = function(node, all_nodes_ts, task_reg=NULL){
 }
 
 run_ucr_glm = function(all_nodes_ts, task_reg=NULL){
+  
+  all_nodes_ts = extract_ts_matrix(all_nodes_ts)
   
   num_nodes = dim(all_nodes_ts)[1]
   

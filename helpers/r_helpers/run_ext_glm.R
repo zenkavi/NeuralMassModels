@@ -1,4 +1,9 @@
+helpers_path = '~/Dropbox/RangelLab/NetworkGLM/helpers/r_helpers/'
+source(paste0(helpers_path,'extract_ts_matrix.R'))
+
 run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_net_act=TRUE, inc_self_stim=TRUE){
+  
+  all_nodes_ts = extract_ts_matrix(all_nodes_ts)
   
   s = args_dict$s
   dt = args_dict$dt
@@ -51,8 +56,9 @@ run_ext_glm_node = function(node, all_nodes_ts, args_dict, task_reg=NULL, inc_ne
 
 run_ext_glm = function(all_nodes_ts, args_dict, task_reg=NULL, inc_net_act = TRUE, inc_self_stim = TRUE){
   
-  num_nodes = dim(all_nodes_ts)[1]
+  all_nodes_ts = extract_ts_matrix(all_nodes_ts)
   
+  num_nodes = dim(all_nodes_ts)[1]
   
   out = list(ext_task_betas = rep(NA, num_nodes),
              ext_mods = list())
