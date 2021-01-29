@@ -1,4 +1,4 @@
-helpers_path = '~/Dropbox/RangelLab/NetworkGLM/helpers/r_helpers/'
+helpers_path = '~/Dropbox/RangelLab/NeuralMassModels/helpers/r_helpers/'
 source(paste0(helpers_path,'extract_ts_matrix.R'))
 
 run_ucr_glm_node = function(node, all_nodes_ts, task_reg=NULL){
