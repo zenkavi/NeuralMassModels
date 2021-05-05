@@ -105,20 +105,17 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     tasktiming=args_dict['tasktiming']
     ncommunities = args_dict['ncommunities']
     nodespercommunity = args_dict['nodespercommunity']
-    sa = args_dict['sa']
-    ea = args_dict['ea']
-    iv = args_dict['iv']
+    on_len = int(np.ceil(args_dict['on_len']/dt))
+    off_len = int(np.ceil(args_dict['off_len']/dt))
     
     totalnodes = nodespercommunity*ncommunities
+    
     T = np.arange(0,Tmax,dt)
-    # Construct timing array for convolution 
-    # This timing is irrespective of the task being performed
-    # Tasks are only determined by which nodes are stimulated
+    num_blocks = int(np.ceil(len(T)/(on_len + 2*off_len)))
+    
+    # Construct timing 
     if tasktiming is None:
-        tasktiming = np.zeros((len(T)))
-        for t in range(len(T)):
-            if t%iv>sa and t%iv<ea:
-                tasktiming[t] = 1.0
+        tasktiming = np.tile(np.concatenate([np.zeros(off_len), np.ones(on_len), np.zeros(off_len)]), num_blocks)
     
     stimtimes = np.zeros((totalnodes,len(T)))
     
