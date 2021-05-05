@@ -183,11 +183,11 @@ def networkModel(G, args_dict = default_args):
     # External input (or task-evoked input) && noise input
     if I is None: I = np.zeros((totalnodes,len(T)))
     # Noise parameter
-    if noise is None: noise = np.zeros((totalnodes,len(T)))
-    elif noise == 1: noise = np.random.normal(size=(totalnodes,len(T)), loc = noise_loc, scale = noise_scale)
+    if noise is None: noise = np.zeros((totalnodes,I.shape[1]))
+    elif noise == 1: noise = np.random.normal(size=(totalnodes,I.shape[1]), loc = noise_loc, scale = noise_scale)
 
     # Initial conditions and empty arrays
-    Enodes = np.zeros((totalnodes,len(T)))
+    Enodes = np.zeros((totalnodes,I.shape[1]))
     # Initial conditions
         # Initial condition 0 if there is a task simulation
     if I is not None:
@@ -199,7 +199,7 @@ def networkModel(G, args_dict = default_args):
 
     spont_act = np.zeros((totalnodes,))
     
-    for t in range(len(T)-1):
+    for t in range(I.shape[1]-1):
 
         ## Solve using Runge-Kutta Order 2 Method
         spont_act = (noise[:,t] + I[:,t])

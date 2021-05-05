@@ -123,20 +123,23 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     for t in range(len(T)):
         if tasktiming[t] == 1:
             stimtimes[stim_nodes,t] = stim_mag
-            
-    # Calculate number of blocks for each node ff you have alternating stim nodes
-    num_node_blocks = np.floor(len(T)/len(stim_nodes))
-    node_stim_dur = num_node_blocks*(on_len + 2*off_len)
-    
-    # Make sure the tasktiming and stimtime length are the same
-    new_task_len = int((node_stim_dur)*len(stim_nodes))
-    tasktiming = tasktiming[:new_task_len]
-    stimtimes = [x[:new_task_len] for x in stimtimes]
-    
-    # Turn other nodes off when one node is on
-    for i in range(totalnodes):
-        off_nodes = [x for x in stim_nodes if x != i]
-        stimtimes[off_nodes,i*node_stim_dur:node_stim_dur*(i+1)-1] = 0 
+               
+    if alternate_stim_nodes:
+        # Calculate number of blocks for each node if you have alternating stim nodes
+        num_node_blocks = np.floor(len(T)/(on_len + 2*off_len)/len(stim_nodes))
+        node_stim_dur = int(num_node_blocks*(on_len + 2*off_len))
+
+        # Make sure the tasktiming and stimtime length are the same
+        new_task_len = int((node_stim_dur)*len(stim_nodes))
+        tasktiming = tasktiming[:new_task_len]
+        stimtimes = np.array([x[:new_task_len] for x in stimtimes])
+
+        # Turn other nodes off when one node is on
+        for i in stim_nodes:
+            off_nodes = [x for x in stim_nodes if x != i]
+            off_range_start = int(i*node_stim_dur)
+            off_range_end = int(node_stim_dur*(i+1)-1)
+            stimtimes[off_nodes, off_range_start:off_range_end] = 0 
             
     return(tasktiming, stimtimes)
 
