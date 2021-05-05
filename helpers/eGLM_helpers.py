@@ -90,9 +90,8 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
         tasktiming = block task array is created if not specified. If specified must be of length Tmax/dt
         ncommunities = number of communities in network
         nodespercommunity = number of nodes per community in network
-        sa = start point of stimulation
-        ea = end point of stimulation
-        iv = interstim interval
+        on_len = duration of stimulus
+        off_len = duration of off period
 
     Returns: 
         2D array with nodes in rows and time points in columns
@@ -107,6 +106,7 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     nodespercommunity = args_dict['nodespercommunity']
     on_len = int(np.ceil(args_dict['on_len']/dt))
     off_len = int(np.ceil(args_dict['off_len']/dt))
+    alternate_stim_nodes = args_dict['alternate_stim_nodes']
     
     totalnodes = nodespercommunity*ncommunities
     
@@ -123,6 +123,20 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     for t in range(len(T)):
         if tasktiming[t] == 1:
             stimtimes[stim_nodes,t] = stim_mag
+            
+    # Calculate number of blocks for each node ff you have alternating stim nodes
+    num_node_blocks = np.floor(len(T)/len(stim_nodes))
+    node_stim_dur = num_node_blocks*(on_len + 2*off_len)
+    
+    # Make sure the tasktiming and stimtime length are the same
+    new_task_len = int((node_stim_dur)*len(stim_nodes))
+    tasktiming = tasktiming[:new_task_len]
+    stimtimes = [x[:new_task_len] for x in stimtimes]
+    
+    # Turn other nodes off when one node is on
+    for i in range(totalnodes):
+        off_nodes = [x for x in stim_nodes if x != i]
+        stimtimes[off_nodes,i*node_stim_dur:node_stim_dur*(i+1)-1] = 0 
             
     return(tasktiming, stimtimes)
 

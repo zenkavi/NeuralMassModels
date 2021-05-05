@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 
 # Set default arguments that appear repeatadly in functions below and downstream functions that import this script
-default_args = {'bottomup': False, 
+default_args = {'alternate_stim_nodes': 0,
+                'bottomup': False, 
                 'dt':.5,  
                 'g':1, 
                 'hubnetwork_dsity': .25,
