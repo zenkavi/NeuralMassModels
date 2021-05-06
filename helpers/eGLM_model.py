@@ -16,7 +16,7 @@ default_args = {'alternate_stim_nodes': 0,
                 'noise': None,
                 'noise_loc': 0, 
                 'noise_scale': 0,
-                'nodespercommunity': 35,
+                'nodespercommunity': 1,
                 'outnetwork_dsity':.08,
                 'plot_network': False,
                 'plot_task': False, 
@@ -24,7 +24,7 @@ default_args = {'alternate_stim_nodes': 0,
                 'showplot':False,
                 'standardize':False,
                 'stim_mag':.5,
-                'stimsize': 3, 
+                'stimsize': 1, 
                 'taskdata':None,
                 'tasktiming':None,
                 'tau':1, 
@@ -97,13 +97,11 @@ def generateStructuralNetwork(args_dict = default_args):
                     indend_j = j*nodespercommunity + nodespercommunity
                     W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
 
-    # Make sure self-connections exist
-#     np.fill_diagonal(W, 1)
+    # Make sure self-connections are 0 as they are added separately in the next step
     np.fill_diagonal(W, 0)
 
     if showplot:
         W_plot = copy(W)
-#         np.fill_diagonal(W_plot, 0.5)
         plt.figure()
         plt.imshow(W_plot, origin='lower',cmap='bwr')
         plt.title('Structural Matrix', y=1.08)
@@ -114,7 +112,7 @@ def generateStructuralNetwork(args_dict = default_args):
     
     return W
 
-def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1.0, weight_scale = .2):
+def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1.0, weight_scale = .2, selfcon_loc = -.5, selfcon_scale = .1):
     """
     Generate synaptic matrix over structural matrix with randomized gaussian weighs with
     mean = 1.0 and standard deviation of 0.2 (so all weights are positive)
@@ -141,7 +139,10 @@ def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1
     np.fill_diagonal(G,0)
     for col in range(G.shape[1]):
         G[:,col] = np.divide(G[:,col],np.sqrt(nodeDeg))
-    #G = G/np.sqrt(totalnodes)
+        
+    # Add inhibitory self-connections
+    self_cons = np.random.normal(loc=selfcon_loc, scale=selfcon_scale, size=(totalnodes,))
+    np.fill_diagonal(G, self_cons)
 
     if showplot:
         plt.figure()
