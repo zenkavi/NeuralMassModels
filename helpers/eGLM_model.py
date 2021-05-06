@@ -34,8 +34,6 @@ default_args = {'alternate_stim_nodes': 0,
 
 
 def phi(x):
-#     out = (np.exp(2*x) - 1)/(np.exp(2*x) + 1)
-#     return(out)
     return(np.tanh(x))
     
 
@@ -133,10 +131,11 @@ def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1
     G[connect_ind] = weights
     
     # Find num connections per node
+    # Add self-connection indicators to avoid 0's in the denominator of degree calculation
+    np.fill_diagonal(W, 1)
     nodeDeg = np.sum(W,axis=1)
 
     # Synaptic scaling according to number of incoming connections
-    np.fill_diagonal(G,0)
     for col in range(G.shape[1]):
         G[:,col] = np.divide(G[:,col],np.sqrt(nodeDeg))
         
@@ -146,7 +145,7 @@ def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1
 
     if showplot:
         plt.figure()
-        plt.imshow(G, origin='lower')#, vmin=0, vmax=20)
+        plt.imshow(G, origin='lower')
         plt.colorbar()
         plt.title('Synaptic Weight Matrix -- Coupling Matrix', y=1.08)
         plt.xlabel('Regions')
@@ -157,14 +156,7 @@ def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1
 
 def networkModel(G, args_dict = default_args):
     """
-    G = Synaptic Weight Matrix
-    Tmax = 100      (1sec / 1000ms)
-    dt = .1         (1ms)
-    g = 1.0         Coupling 
-    s = 0.8         Self connection
-    tau = 1.0       Time constant 
-    I = 0.0         Stimulation/Task
-    
+    G = Synaptic Weight Matrix    
     
     """
     # Initialize parameters
