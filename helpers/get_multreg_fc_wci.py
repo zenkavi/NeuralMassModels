@@ -1,7 +1,7 @@
 import numpy as np
 import statsmodels.api as sm
 
-def get_multreg_fc_wci(activity_matrix, network):
+def get_multreg_fc_wci(activity_matrix, network, lag = 0):
     
     nnodes = activity_matrix.shape[0]
     
@@ -11,10 +11,18 @@ def get_multreg_fc_wci(activity_matrix, network):
     
     for targetnode in range(nnodes):
         othernodes = list(range(nnodes))
-        othernodes.remove(targetnode) # Remove target node from 'other nodes'
-        X = activity_matrix[othernodes,:].T
-        X = sm.add_constant(X)
-        y = activity_matrix[targetnode,:]
+        
+        if lag == 0:
+            othernodes.remove(targetnode) # Remove target node from 'other nodes'
+            X = activity_matrix[othernodes,:].T
+            X = sm.add_constant(X)
+            y = activity_matrix[targetnode,:]
+        else: # Keep target node from 'other nodes'
+            X = activity_matrix[othernodes,lag:].T
+            X = sm.add_constant(X)
+            y = activity_matrix[targetnode,:-lag]
+        
+        
         mod = sm.OLS(y, X)
         res = mod.fit()
         
