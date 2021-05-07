@@ -21,6 +21,8 @@ default_args = {'alternate_stim_nodes': 0,
                 'plot_network': False,
                 'plot_task': False, 
                 's':.8,
+                'selfcon_loc': -.5, 
+                'selfcon_scale': .1,
                 'showplot':False,
                 'standardize':False,
                 'stim_mag':.5,
@@ -30,7 +32,9 @@ default_args = {'alternate_stim_nodes': 0,
                 'tau':1, 
                 'Tmax':1000,
                 'topdown':True,
-                'W': None}
+                'W': None,
+                'weight_loc': 1.0, 
+                'weight_scale': .2}
 
 
 def phi(x):
@@ -62,7 +66,7 @@ def generateStructuralNetwork(args_dict = default_args):
     
     totalnodes = nodespercommunity * ncommunities
 
-    W = np.zeros((totalnodes,totalnodes))
+    S = np.zeros((totalnodes,totalnodes))
     # Construct structural matrix
     nodecount = 0
     for i in range(ncommunities):
@@ -73,14 +77,14 @@ def generateStructuralNetwork(args_dict = default_args):
                 tmp_a = np.random.rand(nodespercommunity,nodespercommunity)<innetwork_dsity
                 indstart = i*nodespercommunity
                 indend = i*nodespercommunity+nodespercommunity
-                W[indstart:indend,indstart:indend] = tmp_a
+                S[indstart:indend,indstart:indend] = tmp_a
             else:
                 tmp_b = np.random.rand(nodespercommunity,nodespercommunity)<outnetwork_dsity
                 indstart_i = i*nodespercommunity
                 indend_i = i*nodespercommunity + nodespercommunity
                 indstart_j = j*nodespercommunity
                 indend_j = j*nodespercommunity + nodespercommunity
-                W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
+                S[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
 
     # Redo a community as a hub-network
     hubnetwork = 0
@@ -93,13 +97,13 @@ def generateStructuralNetwork(args_dict = default_args):
                     indend_i = i*nodespercommunity + nodespercommunity
                     indstart_j = j*nodespercommunity
                     indend_j = j*nodespercommunity + nodespercommunity
-                    W[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
+                    S[indstart_i:indend_i, indstart_j:indend_j] = tmp_b
 
     # Make sure self-connections are 0 as they are added separately in the next step
-    np.fill_diagonal(W, 0)
+    np.fill_diagonal(S, 0)
 
     if showplot:
-        W_plot = copy(W)
+        S_plot = copy(S)
         plt.figure()
         plt.imshow(W_plot, origin='lower',cmap='bwr')
         plt.title('Structural Matrix', y=1.08)
@@ -108,9 +112,9 @@ def generateStructuralNetwork(args_dict = default_args):
         plt.colorbar()
         plt.tight_layout()
     
-    return W
+    return S
 
-def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1.0, weight_scale = .2, selfcon_loc = -.5, selfcon_scale = .1):
+def generateSynapticNetwork(S, args_dict):
     """
     Generate synaptic matrix over structural matrix with randomized gaussian weighs with
     mean = 1.0 and standard deviation of 0.2 (so all weights are positive)
@@ -122,39 +126,45 @@ def generateSynapticNetwork(W, showplot=default_args['showplot'], weight_loc = 1
     Returns:
         Synaptic matrix with Gaussian weights on top of structural matrix
     """
+    showplot = args_dict['showplot']
+    weight_loc = args_dict['weight_loc']
+    weight_scale = args_dict['weight_scale']
+    selfcon_loc = args_dict['selfcon_loc']
+    selfcon_scale = args_dict['selfcon_scale']
+    
     # Find non-zero connections
-    G = np.zeros((W.shape))
-    totalnodes = G.shape[0]
-    connect_ind = np.where(W!=0)
+    W = np.zeros((S.shape))
+    totalnodes = W.shape[0]
+    connect_ind = np.where(S!=0)
     nconnects = len(connect_ind[0])
     weights = np.random.normal(loc=weight_loc,scale=weight_scale, size=(nconnects,))
-    G[connect_ind] = weights
+    W[connect_ind] = weights
     
     # Find num connections per node
     # Add self-connection indicators to avoid 0's in the denominator of degree calculation
-    np.fill_diagonal(W, 1)
-    nodeDeg = np.sum(W,axis=1)
+    np.fill_diagonal(S, 1)
+    nodeDeg = np.sum(S,axis=1)
 
     # Synaptic scaling according to number of incoming connections
-    for col in range(G.shape[1]):
-        G[:,col] = np.divide(G[:,col],np.sqrt(nodeDeg))
+    for col in range(W.shape[1]):
+        W[:,col] = np.divide(W[:,col],np.sqrt(nodeDeg))
         
     # Add inhibitory self-connections
     self_cons = np.random.normal(loc=selfcon_loc, scale=selfcon_scale, size=(totalnodes,))
-    np.fill_diagonal(G, self_cons)
+    np.fill_diagonal(W, self_cons)
 
     if showplot:
         plt.figure()
-        plt.imshow(G, origin='lower')
+        plt.imshow(W, origin='lower')
         plt.colorbar()
         plt.title('Synaptic Weight Matrix -- Coupling Matrix', y=1.08)
         plt.xlabel('Regions')
         plt.ylabel('Regions')
         plt.tight_layout()
         
-    return G
+    return W
 
-def networkModel(G, args_dict = default_args):
+def networkModel(W, args_dict = default_args):
     """
     G = Synaptic Weight Matrix    
     
@@ -171,7 +181,7 @@ def networkModel(G, args_dict = default_args):
     noise_scale = args_dict['noise_scale']
        
     T = np.arange(0, Tmax, dt)
-    totalnodes = G.shape[0]
+    totalnodes = W.shape[0]
   
     # External input (or task-evoked input) && noise input
     if I is None: I = np.zeros((totalnodes,len(T)))
@@ -196,14 +206,14 @@ def networkModel(G, args_dict = default_args):
 
         ## Solve using Runge-Kutta Order 2 Method
         spont_act = (noise[:,t] + I[:,t])
-        k1e = -Enodes[:,t] + g*np.dot(G,phi(Enodes[:,t]))
+        k1e = -Enodes[:,t] + g*np.dot(W,phi(Enodes[:,t]))
         k1e += s*phi(Enodes[:,t]) + spont_act
         k1e = k1e/tau
         # 
         ave = Enodes[:,t] + k1e*dt
         #
         spont_act = (noise[:,t+1] + I[:,t+1])
-        k2e = -ave + g*np.dot(G,phi(ave))
+        k2e = -ave + g*np.dot(W,phi(ave))
         k2e += s*phi(ave) + spont_act
         k2e = k2e/tau
 
