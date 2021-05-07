@@ -9,7 +9,7 @@ def get_multreg_fc_wci(activity_matrix, network):
     multreg_fc_lb = np.zeros((nnodes,nnodes))
     multreg_fc_ub = np.zeros((nnodes,nnodes))
     
-    for targetnode in tange(nnodes):
+    for targetnode in range(nnodes):
         othernodes = list(range(nnodes))
         othernodes.remove(targetnode) # Remove target node from 'other nodes'
         X = activity_matrix[othernodes,:].T
