@@ -39,7 +39,6 @@ default_args = {'alternate_stim_nodes': 0,
 
 def phi(x):
     return(np.tanh(x))
-    
 
 def generateStructuralNetwork(args_dict = default_args):
     """
