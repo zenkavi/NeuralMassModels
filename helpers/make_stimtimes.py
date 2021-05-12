@@ -42,6 +42,11 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
     if tasktiming is None:
         tasktiming = np.tile(np.concatenate([np.zeros(off_len), np.ones(on_len), np.zeros(off_len)]), num_blocks)
     
+    # If tasktiming ended up being longer than T
+    if len(tasktiming) > len(T):
+        T = np.arange(0,len(tasktiming)*dt,dt)
+        args_dict.update({'Tmax': len(T)})
+    
     stimtimes = np.zeros((totalnodes,len(T)))
     
     # When task is ON the activity for a stim_node at that time point changes the size of stim_mag
@@ -66,4 +71,4 @@ def make_stimtimes(stim_nodes, args_dict = default_args):
             off_range_end = int(node_stim_dur*(i+1)-1)
             stimtimes[off_nodes, off_range_start:off_range_end] = 0 
             
-    return(tasktiming, stimtimes)
+    return(tasktiming, stimtimes, args_dict)
